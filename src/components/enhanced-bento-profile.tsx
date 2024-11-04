@@ -1,14 +1,15 @@
+'use client'
 import React, { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Slider } from "@/components/ui/slider"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Twitter, Instagram, Linkedin, Github, Youtube, Dribbble, Figma, FileText, Plus, Trash2, Eye, Edit } from 'lucide-react'
+import { Twitter, Instagram, Linkedin, Github, Youtube, Dribbble, Figma, FileText, Plus, Trash2, Edit } from 'lucide-react'
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
 import { HexColorPicker } from "react-colorful"
 import { saveAs } from 'file-saver'
@@ -81,7 +82,7 @@ export function EnhancedBentoProfileComponent() {
   const [bgImage, setBgImage] = useState('')
   const [bgGif, setBgGif] = useState('')
   const [editingItem, setEditingItem] = useState<BentoItem | null>(null)
-  const [showColorPicker, setShowColorPicker] = useState(false)
+  // const [showColorPicker, setShowColorPicker] = useState(false)
   const [showPreview, setShowPreview] = useState(false)
   const [showBgEditor, setShowBgEditor] = useState(false)
   const [profileImage, setProfileImage] = useState('https://i.pinimg.com/originals/1a/ab/17/1aab17124bee3720d418fdc9fd0c9816.jpg')
@@ -192,7 +193,7 @@ export function EnhancedBentoProfileComponent() {
     }
   }
 
-  const getBackgroundStyle = () => {
+  const getBackgroundStyle = (): React.CSSProperties => {
     switch (bgType) {
       case 'color':
         return { backgroundColor: bgColor }
@@ -204,8 +205,8 @@ export function EnhancedBentoProfileComponent() {
         }
       case 'gif':
         return { 
-          backgroundColor: 'transparent',  // Changed from bgColor to transparent
-          position: 'relative' 
+          backgroundColor: 'transparent',
+          position: 'relative' as const
         }
     }
   }
@@ -619,7 +620,6 @@ export function EnhancedBentoProfileComponent() {
     const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
     saveAs(blob, 'my-space.html');
   };
-
   return (
     <div style={getBackgroundStyle()} className="min-h-screen p-8">
       {bgType === 'gif' && bgGif && (
@@ -628,7 +628,7 @@ export function EnhancedBentoProfileComponent() {
           className="absolute inset-0 w-full h-full overflow-hidden"
           style={{
             zIndex: 0,
-            '& > div': { // This targets Tenor's container
+           ['& div' as any]: {
               width: '100% !important',
               height: '100% !important'
             }
@@ -985,7 +985,7 @@ export function EnhancedBentoProfileComponent() {
             <DialogHeader>
               <DialogTitle>Edit Background</DialogTitle>
             </DialogHeader>
-            <Tabs defaultValue={bgType} onValueChange={(value: 'color' | 'image' | 'gif') => setBgType(value)}>
+            <Tabs defaultValue={bgType} onValueChange={(value) => setBgType(value as 'color' | 'image' | 'gif')}>
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="color">Color</TabsTrigger>
                 <TabsTrigger value="image">Image</TabsTrigger>
@@ -1040,14 +1040,14 @@ export function EnhancedBentoProfileComponent() {
             <DialogHeader>
               <DialogTitle>Profile Preview</DialogTitle>
             </DialogHeader>
-            <div style={getBackgroundStyle()} className="p-8 rounded-lg">
+            <div style={getBackgroundStyle()} className="p-8 rounded-lg relative">
               {bgType === 'gif' && bgGif && (
                 <div 
                   dangerouslySetInnerHTML={{ __html: bgGif }} 
                   className="absolute inset-0 w-full h-full overflow-hidden"
                   style={{
                     zIndex: 0,
-                    '& > div': { // This targets Tenor's container
+                    ['& div' as any]: { // This targets Tenor's container
                       width: '100% !important',
                       height: '100% !important'
                     }
