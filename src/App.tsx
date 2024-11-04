@@ -1,9 +1,8 @@
-import { ProfilePageComponent } from "./components/profile-page";
-
+import  {EnhancedBentoProfileComponent}  from "./components/enhanced-bento-profile";
 function App() {
   return (
     
-    <ProfilePageComponent/>
+    <EnhancedBentoProfileComponent/>
   );
 }
 
