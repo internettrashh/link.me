@@ -124,7 +124,13 @@ export function EnhancedBentoProfileComponent() {
     setEditingItem(item)
   }
 
-  
+  const handleSaveItem = (item: BentoItem) => {
+    if (item.id === 'profile') {
+      setProfileImage(item.content.imageUrl || profileImage);
+    } else {
+      setItems(items.map(i => i.id === item.id ? item : i));
+    }
+  };
 
   const onDragEnd = (result: DropResult) => {
     if (!result.destination) return
@@ -1076,7 +1082,7 @@ export function EnhancedBentoProfileComponent() {
                   Delete
                 </Button>
               )}
-              {/* <Button onClick={() => {
+              <Button onClick={() => {
                 if (editingItem?.id === 'profile') {
                   handleSaveItem(editingItem);
                 } else {
@@ -1084,8 +1090,8 @@ export function EnhancedBentoProfileComponent() {
                 }
                 setEditingItem(null);
               }}>
-                Save Changes */}
-              {/* </Button> */}
+                Save Changes
+              </Button>
             </div>
           </DialogContent>
         </Dialog>
