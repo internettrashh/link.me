@@ -12,7 +12,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Twitter, Instagram, Linkedin, Github, Youtube, Dribbble, Figma, FileText, Plus, Trash2, Edit } from 'lucide-react'
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
 import { HexColorPicker } from "react-colorful"
-import { saveAs } from 'file-saver'
+import { uploadHtmlFile } from '@/Hooks/uploadsite'
+import { ConnectButton, useConnection } from "arweave-wallet-kit"
 
 interface BentoItem {
   id: string
@@ -74,6 +75,8 @@ const getTenorId = (url: string) => {
 };
 
 export function EnhancedBentoProfileComponent() {
+  const { connected } = useConnection()
+
   const [name, setName] = useState('John Doe')
   const [bio, setBio] = useState('Welcome to my linkspace profile!')
   const [items, setItems] = useState<BentoItem[]>(initialItems)
@@ -616,10 +619,26 @@ export function EnhancedBentoProfileComponent() {
       </body>
       </html>`;
 
-    // Create and download the file
-    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-    saveAs(blob, 'my-space.html');
+    // Instead of creating and downloading blob, return the HTML string
+    return html;
   };
+
+  const handleShareSpace = async () => {
+    // Generate HTML first
+    const html = generateStaticHTML();
+    
+    // Upload the HTML content
+    try {
+      // Convert HTML string to File object
+      const htmlBlob = new Blob([html], { type: 'text/html' });
+      const htmlFile = new File([htmlBlob], 'space.html', { type: 'text/html' });
+      const result = await uploadHtmlFile(htmlFile);
+      console.log('Upload result:', result);
+    } catch (error) {
+      console.error('Error uploading HTML:', error);
+    }
+  };
+
   return (
     <div style={getBackgroundStyle()} className="min-h-screen p-8">
       {bgType === 'gif' && bgGif && (
@@ -739,12 +758,26 @@ export function EnhancedBentoProfileComponent() {
           <Button onClick={() => setShowBgEditor(true)}>
             Edit Background
           </Button>
-          <Button 
-            className="bg-blue-500 hover:bg-blue-600 text-white" 
-            onClick={generateStaticHTML}
-          >
-            <FileText className="mr-2 h-4 w-4" /> Share This Space
-          </Button>
+          <div className="flex gap-2">
+            {/* {!connected ? (
+              <>
+                <Button 
+                  className="bg-gray-400 cursor-not-allowed text-white" 
+                  disabled
+                >
+                  <FileText className="mr-2 h-4 w-4" /> Share This Space
+                </Button>
+                <ConnectButton/>
+              </>
+            ) : ( */}
+              <Button 
+                className="bg-blue-500 hover:bg-blue-600 text-white" 
+                onClick={handleShareSpace}
+              >
+                <FileText className="mr-2 h-4 w-4" /> Share This Space
+              </Button>
+            
+          </div>
         </div>
 
         <Dialog open={!!editingItem} onOpenChange={() => setEditingItem(null)}>
