@@ -19,7 +19,7 @@ export function LinkGenerator() {
   const setUserName = useStore((state) => state.setUserName)
   const setFormattedLink = useStore((state) => state.setFormattedLink)
   const setFormattedName = useStore((state) => state.setFormattedName)
-  const setUnderName = useStore((state) => state.setUnderName)
+  const setUnderName = useStore((state) => state.setUndername)
   const setShareLink = useStore((state) => state.setShareLink)
   const navigate = useNavigate()
   const activeAddress = useActiveAddress()

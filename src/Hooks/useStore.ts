@@ -6,6 +6,7 @@ interface StoreState {
   formattedName: string
   shareLink: string
   undername: string | null
+  setUndername: (undername: string | null) => void
   setUserName: (name: string) => void
   setFormattedLink: (link: string) => void
   setFormattedName: (name: string) => void
@@ -21,5 +22,6 @@ export const useStore = create<StoreState>((set) => ({
   setUserName: (name) => set({ userName: name }),
   setFormattedLink: (link) => set({ formattedLink: link }),
   setFormattedName: (name) => set({ formattedName: name }),
-  setShareLink: (link) => set({ shareLink: link })
+  setShareLink: (link) => set({ shareLink: link }),
+  setUndername: (undername) => set({ undername }),
 }))

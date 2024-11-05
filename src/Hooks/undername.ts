@@ -1,12 +1,9 @@
 import { connect, createDataItemSigner } from "@permaweb/aoconnect";
-import { createDataItemSigner as nodeCDIS } from "@permaweb/aoconnect/node";
-
 
 export const AppVersion = "1.0.0";
 export const AOModule = "u1Ju_X8jiuq4rX9Nh-ZGRQuYQZgV2MKLMT3CZsykk54"; // sqlite
 export const AOScheduler = "_GQ33BkPtZrqxA84vM8Zk-N2aO0toNNu_C-l-rawrBA";
 export const UNDERNAME_PROCESS = "K6237CpdkRfSGLYyfmRby3RNL5dSzjmZDVGCWNnP_oI";
-
 
 const CommonTags = [
     { name: "App-Name", value: "ARlink" },
@@ -14,7 +11,6 @@ const CommonTags = [
 ];
 
 export type Tag = { name: string; value: string };
-
 
 export async function spawnProcess(name?: string, tags?: Tag[], newProcessModule?: string) {
     const ao = connect();
@@ -30,7 +26,7 @@ export async function spawnProcess(name?: string, tags?: Tag[], newProcessModule
         module: newProcessModule ? newProcessModule : AOModule,
         scheduler: AOScheduler,
         tags,
-        signer: (window.arweaveWallet as any)?.signDataItem ? createDataItemSigner(window.arweaveWallet) : nodeCDIS(window.arweaveWallet),
+        signer: createDataItemSigner(window.arweaveWallet)
     });
 
     return result;
@@ -45,26 +41,16 @@ export async function runLua(code: string, process: string, tags?: Tag[]) {
         tags = CommonTags;
     }
 
-    // if (!window.arweaveWallet) {
-    //   const dryMessage = await ao.dryrun({
-    //     process,
-    //     data: code,
-    //     tags,
-    //   });
-    //   return dryMessage
-    // }
-
     tags = [...tags, { name: "Action", value: "Eval" }];
 
     const message = await ao.message({
         process,
         data: code,
-        signer: (window.arweaveWallet as any)?.signDataItem ? createDataItemSigner(window.arweaveWallet) : nodeCDIS(window.arweaveWallet),
+        signer: createDataItemSigner(window.arweaveWallet),
         tags,
     });
 
     const result = await ao.result({ process, message });
-    // console.log(result);
     (result as any).id = message;
     return result;
 }
@@ -93,7 +79,7 @@ export async function monitor(process: string) {
 
     const r = await ao.monitor({
         process,
-        signer: (window.arweaveWallet as any)?.signDataItem ? createDataItemSigner(window.arweaveWallet) : nodeCDIS(window.arweaveWallet),
+        signer: createDataItemSigner(window.arweaveWallet),
     });
 
     return r;
@@ -104,7 +90,7 @@ export async function unmonitor(process: string) {
 
     const r = await ao.unmonitor({
         process,
-        signer: (window.arweaveWallet as any)?.signDataItem ? createDataItemSigner(window.arweaveWallet) : nodeCDIS(window.arweaveWallet),
+        signer: createDataItemSigner(window.arweaveWallet),
     });
 
     return r;
@@ -168,26 +154,24 @@ export const BAZAR = {
   
   export async function setArnsName(antProcess: string, manifestId: string, undername = '@') {
     const ao = connect();
-   const msgtags = [
-   
-
-    { name: 'Action', value: 'Set-Record' },
-    { name: 'Sub-Domain', value: undername },
-    { name: 'Transaction-Id', value: manifestId },
-    { name: 'TTL-Seconds', value: '3600' },
-   ]
-   try{
-    const result = await ao.message({
-        process: antProcess,
-        tags: msgtags,
-        signer: (window.arweaveWallet as any)?.signDataItem ? createDataItemSigner(window.arweaveWallet) : nodeCDIS(window.arweaveWallet),
-        data: "",
-    });
-    console.log("set arns message officially sent out ", result);
-    return result;
-   }catch(e){
-    console.error(e);
-   }
+    const msgtags = [
+        { name: 'Action', value: 'Set-Record' },
+        { name: 'Sub-Domain', value: undername },
+        { name: 'Transaction-Id', value: manifestId },
+        { name: 'TTL-Seconds', value: '3600' },
+    ];
+    try {
+        const result = await ao.message({
+            process: antProcess,
+            tags: msgtags,
+            signer: createDataItemSigner(window.arweaveWallet),
+            data: "",
+        });
+        console.log("set arns message officially sent out ", result);
+        return result;
+    } catch(e) {
+        console.error(e);
+    }
 }
 
 export async function registerUndername(undername: string, transactionId: string) {
@@ -202,7 +186,7 @@ export async function registerUndername(undername: string, transactionId: string
             process: UNDERNAME_PROCESS,
             tags: [{ name: 'Action', value: 'Register' }],
             data,
-            signer: (window.arweaveWallet as any)?.signDataItem ? createDataItemSigner(window.arweaveWallet) : nodeCDIS(window.arweaveWallet),
+            signer: createDataItemSigner(window.arweaveWallet),
         });
 
         const result = await ao.result({ 
@@ -236,7 +220,7 @@ export async function getUserByAddress(address: string) {
             process: UNDERNAME_PROCESS,
             tags: [{ name: 'Action', value: 'GetUsers' }],
             data,
-            signer: (window.arweaveWallet as any)?.signDataItem ? createDataItemSigner(window.arweaveWallet) : nodeCDIS(window.arweaveWallet),
+            signer: createDataItemSigner(window.arweaveWallet),
         });
 
         const result = await ao.result({ 
@@ -290,7 +274,7 @@ export async function getAllUsers() {
             process: UNDERNAME_PROCESS,
             tags: [{ name: 'Action', value: 'GetUsers' }],
             data,
-            signer: (window.arweaveWallet as any)?.signDataItem ? createDataItemSigner(window.arweaveWallet) : nodeCDIS(window.arweaveWallet),
+            signer: createDataItemSigner(window.arweaveWallet),
         });
 
         const result = await ao.result({ 
@@ -344,7 +328,7 @@ export async function removeRecord(undername: string) {
             process: UNDERNAME_PROCESS,
             tags: [{ name: 'Action', value: 'Remove-Record' }],
             data,
-            signer: (window.arweaveWallet as any)?.signDataItem ? createDataItemSigner(window.arweaveWallet) : nodeCDIS(window.arweaveWallet),
+            signer: createDataItemSigner(window.arweaveWallet),
         });
 
         const result = await ao.result({ 
