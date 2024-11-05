@@ -115,9 +115,13 @@ export function EnhancedBentoProfileComponent() {
   }
 
   const handleSaveItem = (updatedItem: BentoItem) => {
-    setItems(items.map(item => item.id === updatedItem.id ? updatedItem : item))
-    setEditingItem(null)
-  }
+    if (updatedItem.id === 'profile') {
+      setProfileImage(updatedItem.content.imageUrl || profileImage);
+    } else {
+      setItems(items.map(item => item.id === updatedItem.id ? updatedItem : item));
+    }
+    setEditingItem(null);
+  };
 
   const onDragEnd = (result: DropResult) => {
     if (!result.destination) return
@@ -147,7 +151,7 @@ export function EnhancedBentoProfileComponent() {
           <div className="w-full h-full relative">
             <img
               src={item.content.imageUrl || ''}
-              alt="Bento item image"
+              alt="example space image edit me"
               className="w-full h-full object-cover rounded-lg"
             />
           </div>
@@ -416,6 +420,25 @@ export function EnhancedBentoProfileComponent() {
         text-decoration: none;
         color: inherit;
       }
+
+      /* Add these new styles for iframes */
+      iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        border-radius: 0.5rem;
+        min-height: 200px;
+      }
+      
+      .tenor-gif-embed {
+        width: 100%;
+        height: 100%;
+      }
+      
+      .tenor-gif-embed iframe {
+        width: 100% !important;
+        height: 100% !important;
+      }
     `.replace(/\s+/g, ' ').trim();
 
     // Create the background HTML based on type
@@ -486,7 +509,6 @@ export function EnhancedBentoProfileComponent() {
             content = `
               <iframe
                 src="${embedUrl}"
-                class="w-full h-full rounded-lg"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowfullscreen
               ></iframe>
@@ -495,10 +517,9 @@ export function EnhancedBentoProfileComponent() {
             const tenorId = getTenorId(item.content.url || '');
             if (tenorId) {
               content = `
-                <div class="tenor-gif-embed w-full h-full" data-postid="${tenorId}" data-share-method="host">
+                <div class="tenor-gif-embed" data-postid="${tenorId}" data-share-method="host">
                   <iframe 
                     src="https://tenor.com/embed/${tenorId}?autoplay=1"
-                    class="w-full h-full rounded-lg"
                     frameborder="0"
                     allowfullscreen
                   ></iframe>
@@ -1000,16 +1021,16 @@ export function EnhancedBentoProfileComponent() {
                   Delete
                 </Button>
               )}
-              <Button onClick={() => {
+              {/* <Button onClick={() => {
                 if (editingItem?.id === 'profile') {
-                  setProfileImage(editingItem.content.imageUrl || '/placeholder.svg')
+                  handleSaveItem(editingItem);
                 } else {
-                  handleSaveItem(editingItem!)
+                  handleSaveItem(editingItem!);
                 }
-                setEditingItem(null)
+                setEditingItem(null);
               }}>
-                Save Changes
-              </Button>
+                Save Changes */}
+              {/* </Button> */}
             </div>
           </DialogContent>
         </Dialog>
