@@ -689,22 +689,25 @@ export function EnhancedBentoProfileComponent() {
     // Generate HTML first
     const html = generateStaticHTML();
     
-    // Upload the HTML content
     try {
       const result = await uploadHtmlFile(html);
       console.log('Upload result:', result);
       const sharelink = `https://arweave.net/${result.txId}`
       
-      // Use formattedName from global store for registration
-      //@ts-ignore
-      await registerUndername(formattedName, result.txId);
+      // Remove 'ar://' if present in formattedName
+      const cleanFormattedName = formattedName.replace('ar://', '');
       
-      // Save to global store
-      setShareLink(sharelink);
+      // Register with just the name (without _linkspace)
+      //@ts-ignore
+      await registerUndername(cleanFormattedName.replace('_linkspace', ''), result.txId);
+      
+      // Use full name with _linkspace for the share URL
+      setShareLink(`https://${cleanFormattedName}.ar-io.dev/`);
       
       console.log('Undername registered');
-      setUserName(formattedName)
+      setUserName(cleanFormattedName)
       navigate('/share'); 
+
       window.open(sharelink, '_blank');
     } catch (error) {
       console.error('Error uploading HTML:', error);
