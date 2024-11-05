@@ -95,6 +95,7 @@ export async function uploadHtmlFolder(files: File[]) {
         }));
 
         const uploadResult = await turbo.uploadFolder({
+            //@ts-ignore
             files: preparedFiles,
             dataItemOpts: {
                 tags: [

@@ -13,7 +13,10 @@ import { Twitter, Instagram, Linkedin, Github, Youtube, Dribbble, Figma, FileTex
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
 import { HexColorPicker } from "react-colorful"
 import { uploadHtmlFile } from '@/Hooks/uploadsite'
-import { ConnectButton, useConnection } from "arweave-wallet-kit"
+import { ConnectButton, useConnection} from "@arweave-wallet-kit/react"
+import { registerUndername } from '@/Hooks/undername'
+import { useStore } from '@/Hooks/useStore'
+import { useNavigate } from 'react-router-dom'
 
 interface BentoItem {
   id: string
@@ -88,7 +91,14 @@ export function EnhancedBentoProfileComponent() {
   // const [showColorPicker, setShowColorPicker] = useState(false)
   const [showPreview, setShowPreview] = useState(false)
   const [showBgEditor, setShowBgEditor] = useState(false)
+  const setUserName = useStore((state) => state.setUserName)
   const [profileImage, setProfileImage] = useState('https://i.pinimg.com/originals/1a/ab/17/1aab17124bee3720d418fdc9fd0c9816.jpg')
+  const navigate = useNavigate();
+
+  const setShareLink = useStore((state) => state.setShareLink)
+
+  // Get formattedName from global store
+  const formattedName = useStore((state) => state.formattedName)
 
   const handleAddItem = () => {
     const newItem: BentoItem = {
@@ -114,14 +124,7 @@ export function EnhancedBentoProfileComponent() {
     setEditingItem(item)
   }
 
-  const handleSaveItem = (updatedItem: BentoItem) => {
-    if (updatedItem.id === 'profile') {
-      setProfileImage(updatedItem.content.imageUrl || profileImage);
-    } else {
-      setItems(items.map(item => item.id === updatedItem.id ? updatedItem : item));
-    }
-    setEditingItem(null);
-  };
+  
 
   const onDragEnd = (result: DropResult) => {
     if (!result.destination) return
@@ -268,8 +271,13 @@ export function EnhancedBentoProfileComponent() {
         font-family: system-ui, -apple-system, sans-serif;
         min-height: 100vh;
         ${getBackgroundStyles()}
-        padding: 2rem;
+        padding: 1rem;
         position: relative;
+      }
+      @media (min-width: 640px) {
+        body {
+          padding: 2rem;
+        }
       }
       .background-container {
         position: fixed;
@@ -292,19 +300,40 @@ export function EnhancedBentoProfileComponent() {
         background: white;
         border-radius: 0.75rem;
         box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-        padding: 2rem;
+        padding: 1rem;
+      }
+      @media (min-width: 640px) {
+        .container {
+          padding: 2rem;
+        }
       }
       .profile-header {
         display: flex;
+        flex-direction: column;
         align-items: center;
-        gap: 2rem;
+        text-align: center;
+        gap: 1rem;
         margin-bottom: 2rem;
+      }
+      @media (min-width: 640px) {
+        .profile-header {
+          flex-direction: row;
+          align-items: center;
+          text-align: left;
+          gap: 2rem;
+        }
       }
       .avatar-container {
         position: relative;
-        width: 8rem;
-        height: 8rem;
+        width: 6rem;
+        height: 6rem;
         flex-shrink: 0;
+      }
+      @media (min-width: 640px) {
+        .avatar-container {
+          width: 8rem;
+          height: 8rem;
+        }
       }
       .avatar {
         width: 100%;
@@ -330,9 +359,16 @@ export function EnhancedBentoProfileComponent() {
       }
       .grid {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 1rem;
-        margin-bottom: 2rem;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+      }
+      @media (min-width: 640px) {
+        .grid {
+          grid-template-columns: repeat(4, 1fr);
+          gap: 1rem;
+          margin-bottom: 2rem;
+        }
       }
       .item {
         position: relative;
@@ -344,8 +380,13 @@ export function EnhancedBentoProfileComponent() {
         align-items: center;
         justify-content: center;
         text-align: center;
-        min-height: 150px;
+        min-height: 120px;
         transition: all 0.2s ease;
+      }
+      @media (min-width: 640px) {
+        .item {
+          min-height: 150px;
+        }
       }
       .item:hover {
         transform: translateY(-2px);
@@ -650,11 +691,20 @@ export function EnhancedBentoProfileComponent() {
     
     // Upload the HTML content
     try {
-     
-      
       const result = await uploadHtmlFile(html);
       console.log('Upload result:', result);
       const sharelink = `https://arweave.net/${result.txId}`
+      
+      // Use formattedName from global store for registration
+      //@ts-ignore
+      await registerUndername(formattedName, result.txId);
+      
+      // Save to global store
+      setShareLink(sharelink);
+      
+      console.log('Undername registered');
+      setUserName(formattedName)
+      navigate('/share'); 
       window.open(sharelink, '_blank');
     } catch (error) {
       console.error('Error uploading HTML:', error);
@@ -662,7 +712,7 @@ export function EnhancedBentoProfileComponent() {
   };
 
   return (
-    <div style={getBackgroundStyle()} className="min-h-screen p-8">
+    <div style={getBackgroundStyle()} className="min-h-screen p-4 sm:p-8">
       {bgType === 'gif' && bgGif && (
         <div 
           dangerouslySetInnerHTML={{ __html: bgGif }} 
@@ -676,9 +726,9 @@ export function EnhancedBentoProfileComponent() {
           }}
         />
       )}
-      <div className="relative z-10 max-w-4xl mx-auto bg-white rounded-lg shadow-xl p-8">
-        <div className="flex items-center gap-8 mb-8">
-          <div className="relative w-32 h-32">
+      <div className="relative z-10 max-w-4xl mx-auto bg-white rounded-lg shadow-xl p-4 sm:p-8">
+        <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 mb-8">
+          <div className="relative w-24 h-24 sm:w-32 sm:h-32">
             <img
               src={profileImage}
               alt="Profile picture"
@@ -693,17 +743,17 @@ export function EnhancedBentoProfileComponent() {
               <Edit className="h-4 w-4" />
             </Button>
           </div>
-          <div className="flex-grow">
+          <div className="flex-grow w-full sm:w-auto">
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="text-3xl font-bold mb-2 bg-white"
+              className="text-2xl sm:text-3xl font-bold mb-2 bg-white w-full"
               style={inputStyles}
             />
             <Textarea
               value={bio}
               onChange={(e) => setBio(e.target.value)}
-              className="text-gray-600 bg-white"
+              className="text-gray-600 bg-white w-full"
               style={textareaStyles}
               rows={2}
             />
@@ -716,7 +766,7 @@ export function EnhancedBentoProfileComponent() {
               <div
                 {...provided.droppableProps}
                 ref={provided.innerRef}
-                className="grid grid-cols-4 gap-4 mb-8"
+                className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-8"
               >
                 {items.map((item, index) => (
                   <Draggable key={item.id} draggableId={item.id} index={index}>
@@ -776,34 +826,36 @@ export function EnhancedBentoProfileComponent() {
           </CardContent>
         </Card>
 
-        <div className="flex justify-between items-center mb-4">
-          <Button onClick={() => setShowBgEditor(true)}>
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-4 mb-4">
+          <Button onClick={() => setShowBgEditor(true)} className="w-full sm:w-auto">
             Edit Background
           </Button>
-          <div className="flex gap-2">
-            {/* {!connected ? (
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+            {!connected ? (
               <>
                 <Button 
-                  className="bg-gray-400 cursor-not-allowed text-white" 
+                  className="bg-gray-400 cursor-not-allowed text-white w-full sm:w-auto" 
                   disabled
                 >
                   <FileText className="mr-2 h-4 w-4" /> Share This Space
                 </Button>
-                <ConnectButton/>
+                <div className="w-full sm:w-auto">
+                  <ConnectButton/>
+                </div>
               </>
-            ) : ( */}
+            ) : (
               <Button 
-                className="bg-blue-500 hover:bg-blue-600 text-white" 
+                className="bg-blue-500 hover:bg-blue-600 text-white w-full sm:w-auto" 
                 onClick={handleShareSpace}
               >
                 <FileText className="mr-2 h-4 w-4" /> Share This Space
               </Button>
-            
+            )}
           </div>
         </div>
 
         <Dialog open={!!editingItem} onOpenChange={() => setEditingItem(null)}>
-          <DialogContent className="max-w-3xl bg-white" style={dialogContentStyles}>
+          <DialogContent className="max-w-[95vw] sm:max-w-3xl bg-white m-4" style={dialogContentStyles}>
             <DialogHeader>
               <DialogTitle>{editingItem?.id === 'profile' ? 'Edit Profile Picture' : 'Edit Bento Item'}</DialogTitle>
             </DialogHeader>
@@ -1036,7 +1088,7 @@ export function EnhancedBentoProfileComponent() {
         </Dialog>
 
         <Dialog open={showBgEditor} onOpenChange={setShowBgEditor}>
-          <DialogContent className="max-w-3xl bg-white" style={dialogContentStyles}>
+          <DialogContent className="max-w-[95vw] sm:max-w-3xl bg-white m-4" style={dialogContentStyles}>
             <DialogHeader>
               <DialogTitle>Edit Background</DialogTitle>
             </DialogHeader>
@@ -1091,7 +1143,7 @@ export function EnhancedBentoProfileComponent() {
         </Dialog>
 
         <Dialog open={showPreview} onOpenChange={setShowPreview}>
-          <DialogContent className="max-w-3xl bg-white" style={dialogContentStyles}>
+          <DialogContent className="max-w-[95vw] sm:max-w-3xl bg-white m-4" style={dialogContentStyles}>
             <DialogHeader>
               <DialogTitle>Profile Preview</DialogTitle>
             </DialogHeader>
