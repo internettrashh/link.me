@@ -629,11 +629,12 @@ export function EnhancedBentoProfileComponent() {
     
     // Upload the HTML content
     try {
-      // Convert HTML string to File object
-      const htmlBlob = new Blob([html], { type: 'text/html' });
-      const htmlFile = new File([htmlBlob], 'space.html', { type: 'text/html' });
-      const result = await uploadHtmlFile(htmlFile);
+     
+      
+      const result = await uploadHtmlFile(html);
       console.log('Upload result:', result);
+      const sharelink = `https://arweave.net/${result.txId}`
+      window.open(sharelink, '_blank');
     } catch (error) {
       console.error('Error uploading HTML:', error);
     }
